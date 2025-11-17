@@ -3,14 +3,14 @@ __pycache__/
 *.pyo
 *.pyd
 
-.env
+env
 .venv
 venv/
 ENV/
 
 *.env
 *.env.*
-!*.env.example   # Allow example env file
+!*.env.example
 
 build/
 dist/
@@ -48,6 +48,8 @@ docker/volumes/
 .history/
 
 .idea/
+
+secrets/
 
 .DS_Store
 
