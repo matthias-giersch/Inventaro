@@ -3,5 +3,48 @@ version: "3.8"
 services:
   backend:
     build: ./backend
+    container_name: backend
+    volumes:
+      - ./secrets/auth_postgres_user:/run/secrets/auth_postgres_user:ro
+      - ./secrets/auth_postgres_password:/run/secrets/auth_postgres_password:ro
+      - ./secrets/auth_postgres_db:/run/secrets/auth_postgres_db:ro
+      - ./secrets/jwt_secret:/run/secrets/jwt_secret:ro
     ports:
       - "8000:8000"
+    depends_on:
+      - auth_db
+    networks:
+      - backend_net
+
+  auth_db:
+    image: postgres:18
+    container_name: auth_db
+    secrets:
+      - auth_postgres_user
+      - auth_postgres_password
+      - auth_postgres_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql
+      - ./secrets/auth_postgres_user:/run/secrets/auth_postgres_user:ro
+      - ./secrets/auth_postgres_password:/run/secrets/auth_postgres_password:ro
+      - ./secrets/auth_postgres_db:/run/secrets/auth_postgres_db:ro
+    networks:
+      - backend_net
+
+networks:
+  backend_net:
+
+volumes:
+  auth_db_data:
+
+secrets:
+  auth_postgres_user:
+    file: ./secrets/auth_postgres_user
+  auth_postgres_password:
+    file: ./secrets/auth_postgres_password
+  auth_postgres_db:
+    file: ./secrets/auth_postgres_db
+  jwt_secret:
+    file: /secrets/jwt_secret
