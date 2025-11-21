@@ -11,4 +11,7 @@ repos:
     rev: v0.14.5
     hooks:
       - id: ruff
+        name: ruff-linter
+        args: ["--fix"]
       - id: ruff-format
+        name: ruff-formatter
