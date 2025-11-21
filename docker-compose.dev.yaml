@@ -5,20 +5,28 @@ services:
     build: ./backend
     container_name: backend
     volumes:
+      - ./secrets/jwt_secret:/run/secrets/jwt_secret:ro
       - ./secrets/auth_postgres_user:/run/secrets/auth_postgres_user:ro
       - ./secrets/auth_postgres_password:/run/secrets/auth_postgres_password:ro
       - ./secrets/auth_postgres_db:/run/secrets/auth_postgres_db:ro
-      - ./secrets/jwt_secret:/run/secrets/jwt_secret:ro
+      - ./secrets/inv_postgres_user:/run/secrets/inv_postgres_user:ro
+      - ./secrets/inv_postgres_password:/run/secrets/inv_postgres_password:ro
+      - ./secrets/inv_postgres_db:/run/secrets/inv_postgres_db:ro
     ports:
       - "8000:8000"
     depends_on:
       - auth_db
+      - inv_db
     networks:
       - backend_net
 
   auth_db:
     image: postgres:18
     container_name: auth_db
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/auth_postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/auth_postgres_password
+      POSTGRES_DB_FILE: /run/secrets/auth_postgres_db
     secrets:
       - auth_postgres_user
       - auth_postgres_password
@@ -33,18 +41,46 @@ services:
     networks:
       - backend_net
 
+  inv_db:
+    image: postgres:18
+    container_name: inv_db
+    environment:
+      POSTGRES_USER_FILE: /run/secrets/inv_postgres_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/inv_postgres_password
+      POSTGRES_DB_FILE: /run/secrets/inv_postgres_db
+    secrets:
+      - inv_postgres_user
+      - inv_postgres_password
+      - inv_postgres_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - inv_db_data:/var/lib/postgresql
+      - ./secrets/inv_postgres_user:/run/secrets/inv_postgres_user:ro
+      - ./secrets/inv_postgres_password:/run/secrets/inv_postgres_password:ro
+      - ./secrets/inv_postgres_db:/run/secrets/inv_postgres_db:ro
+    networks:
+      - backend_net
+
 networks:
   backend_net:
 
 volumes:
   auth_db_data:
+  inv_db_data:
 
 secrets:
+  jwt_secret:
+    file: /secrets/jwt_secret
   auth_postgres_user:
     file: ./secrets/auth_postgres_user
   auth_postgres_password:
     file: ./secrets/auth_postgres_password
   auth_postgres_db:
     file: ./secrets/auth_postgres_db
-  jwt_secret:
-    file: /secrets/jwt_secret
+  inv_postgres_user:
+    file: ./secrets/inv_postgres_user
+  inv_postgres_password:
+    file: ./secrets/inv_postgres_password
+  inv_postgres_db:
+    file: ./secrets/inv_postgres_db

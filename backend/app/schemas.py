@@ -14,3 +14,7 @@ class UserLogin(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class CategoryCreate(BaseModel):
+    name: str

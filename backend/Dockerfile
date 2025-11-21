@@ -18,4 +18,4 @@ ENV PYTHONUBUFFERED=1
 
 EXPOSE 8000
 
-CMD ["./wait_for_db.sh", "auth_db:5432", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["./wait_for_db.sh", "auth_db:5432", "inv_db:5432", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
