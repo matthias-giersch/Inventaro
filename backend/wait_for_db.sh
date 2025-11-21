@@ -2,19 +2,34 @@
 
 set -e
 
-db="$1"
-shift
-cmd=("$@")
+db_hosts=()
+cmd_start_index=0
+index=1
 
-db_host="${db%%:*}"
-db_port="${db##*:}"
-
-echo "Waiting for database at $db_host:$db_port ..."
-
-until nc -z "$db_host" "$db_port"; do
-    echo "Waiting for $db_host:$db_port..."
-    sleep 5
+for arg in "$@"; do
+    if [[ "$arg" == *:* ]]; then
+        db_hosts+=("$arg")
+    else
+        cmd_start_index=$index
+        break
+    fi
+    ((index++))
 done
 
-echo "Database is up!"
+cmd=("${@:cmd_start_index}")
+
+for db in "${db_hosts[@]}"; do
+    host="${db%%:*}"
+    port="${db##*:}"
+
+    echo "Waiting for $host:$port ..."
+
+    until nc -z "$host" "$port"; do
+        sleep 2
+    done
+
+    echo "Database $host:$port is up!"
+done
+
+echo "Executing: ${cmd[@]}"
 exec "${cmd[@]}"

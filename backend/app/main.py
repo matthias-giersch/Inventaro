@@ -8,7 +8,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database_auth import init_auth_db
+from .database_inv import init_inv_db
 from .routers import auth as auth_router
+from .routers import categories as auth_categories
 
 example_path = Path(".env.example")
 load_dotenv(example_path)
@@ -17,6 +19,7 @@ load_dotenv(example_path)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     init_auth_db()
+    init_inv_db()
     yield
 
 
@@ -30,3 +33,4 @@ app.add_middleware(
 )
 
 app.include_router(auth_router.router)
+app.include_router(auth_categories.router)
