@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from .utils import read_secret
+from .secrets import read_secret
 
 example_path = Path(".env.example")
 load_dotenv(example_path)
