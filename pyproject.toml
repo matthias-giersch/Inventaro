@@ -12,12 +12,7 @@ use_parentheses = true
 
 [tool.ruff]
 line-length = 88
-select = [
-    "E",
-    "F",
-    "I",
-    "B",
-    "C",
-]
 
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "C"]
 ignore = ["E501", "B008"]
