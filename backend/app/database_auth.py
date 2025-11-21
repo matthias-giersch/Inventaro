@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from sqlmodel import Session, SQLModel, create_engine
 
 from . import models_auth  # noqa: F401
-from .utils import read_secret
+from .secrets import read_secret
 
 example_path = Path(".env.example")
 load_dotenv(example_path)

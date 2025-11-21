@@ -1,9 +1,16 @@
-from pathlib import Path
+from fastapi import Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from .auth import decode_access_token
+
+security = HTTPBearer()
 
 
-def read_secret(path: Path, default: str = "") -> str:
-    try:
-        with open(path, "r") as file:
-            return file.read().strip()
-    except FileNotFoundError:
-        return default
+def get_current_user_id(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+) -> int:
+    token = credentials.credentials
+    payload = decode_access_token(token)
+    if not payload or "sub" not in payload:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    return int(payload["sub"])
