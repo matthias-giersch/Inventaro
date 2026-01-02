@@ -10,7 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database_auth import init_auth_db
 from .database_inv import init_inv_db
 from .routers import auth as auth_router
-from .routers import categories as auth_categories
+from .routers import categories as categories
+from .routers import items as items
 
 example_path = Path(".env.example")
 load_dotenv(example_path)
@@ -33,4 +34,5 @@ app.add_middleware(
 )
 
 app.include_router(auth_router.router)
-app.include_router(auth_categories.router)
+app.include_router(categories.router)
+app.include_router(items.router)
