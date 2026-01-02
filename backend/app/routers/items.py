@@ -4,6 +4,7 @@ from sqlmodel import Session
 from .. import crud_inventory
 from ..database_inv import get_inventory_session
 from ..schemas import ItemCreate
+from ..utils import JWTPayload, require_admin
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -13,6 +14,7 @@ def create_item(
     category_id: int,
     item_in: ItemCreate,
     session: Session = Depends(get_inventory_session),
+    _: JWTPayload = Depends(require_admin),
 ) -> dict:
     it = crud_inventory.create_item(
         session,
