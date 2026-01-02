@@ -1,3 +1,5 @@
+from typing import Any, Optional
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -18,3 +20,10 @@ class TokenResponse(BaseModel):
 
 class CategoryCreate(BaseModel):
     name: str
+
+
+class ItemCreate(BaseModel):
+    name: str
+    quantity: int = 0
+    location: Optional[str] = None
+    extra: Optional[dict[str, Any]] = {}
