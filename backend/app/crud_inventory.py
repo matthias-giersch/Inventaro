@@ -25,7 +25,6 @@ def list_categories_for_user(session: Session, user_id: int) -> list[Category]:
     statement = select(Category).where(Category.owner_id == user_id)
     result = session.exec(statement).all()
     return result
-    # return session.exec(select(Category).where(Category.owner_id == user_id)).all()
 
 
 def create_item(
