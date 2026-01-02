@@ -5,7 +5,6 @@ from typing import Generator
 from dotenv import load_dotenv
 from sqlmodel import Session, SQLModel, create_engine
 
-from . import models_auth  # noqa: F401
 from .secrets import read_secret
 
 example_path = Path(".env.example")

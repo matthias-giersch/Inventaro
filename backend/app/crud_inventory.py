@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 from .models_inventory import Category, CategoryField, Item
 
 
-def create_category(session: Session, owner_id: int, name: str) -> Category:
+def create_category(session: Session, name: str, owner_id: int) -> Category:
     cat = Category(name=name, owner_id=owner_id)
     session.add(cat)
     session.commit()
@@ -21,8 +21,8 @@ def add_field_to_category(
     return field
 
 
-def list_categories_for_user(session: Session, user_id: int) -> list[Category]:
-    statement = select(Category).where(Category.owner_id == user_id)
+def list_categories_for_user(session: Session) -> list[Category]:
+    statement = select(Category)
     result = session.exec(statement).all()
     return result
 

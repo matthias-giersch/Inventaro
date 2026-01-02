@@ -4,6 +4,12 @@ services:
   backend:
     build: ./backend
     container_name: backend
+    environment:
+      ADMIN_EMAIL_FILE: /run/secrets/admin_email
+      ADMIN_PASSWORD_FILE: /run/secrets/admin_password
+    secrets:
+      - admin_email
+      - admin_password
     volumes:
       - ./secrets/jwt_secret:/run/secrets/jwt_secret:ro
       - ./secrets/auth_postgres_user:/run/secrets/auth_postgres_user:ro
@@ -84,3 +90,7 @@ secrets:
     file: ./secrets/inv_postgres_password
   inv_postgres_db:
     file: ./secrets/inv_postgres_db
+  admin_email:
+    file: ./secrets/admin_email
+  admin_password:
+    file: ./secrets/admin_password

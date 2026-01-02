@@ -31,5 +31,8 @@ for db in "${db_hosts[@]}"; do
     echo "Database $host:$port is up!"
 done
 
+echo "Running admin initialization ..."
+python -m app.init_admin
+
 echo "Executing: ${cmd[@]}"
 exec "${cmd[@]}"
