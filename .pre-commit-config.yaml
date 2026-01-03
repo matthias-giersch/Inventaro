@@ -22,12 +22,14 @@ repos:
       - id: isort
 
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v9.39.1
+    rev: v8.56.0
     hooks:
       - id: eslint
         name: eslint
         files: \.(js|jsx)$
+        args: ["--fix"]
         additional_dependencies:
+          - eslint@8.56.0
           - eslint-plugin-simple-import-sort
           - eslint-plugin-import
 
