@@ -6,23 +6,15 @@
   },
   "parserOptions": {
     "ecmaVersion": "latest",
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
+    "sourceType": "module"
   },
-  "plugins": ["simple-import-sort", "import", "react"],
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "plugins": ["simple-import-sort", "import"],
+  "extends": ["eslint:recommended"],
   "rules": {
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error",
     "import/first": "error",
     "import/newline-after-import": "error",
     "import/no-duplicates": "error"
-  },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
   }
 }
