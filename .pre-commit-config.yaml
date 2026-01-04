@@ -25,8 +25,8 @@ repos:
     hooks:
       - id: eslint
         name: eslint
-        entry: frontend/node_modules/.bin/eslint
-        language: node
+        entry: bash -c "cd frontend && node_modules/.bin/eslint"
+        language: system
         files: \.(js|jsx)$
         args: ["--fix"]
 
