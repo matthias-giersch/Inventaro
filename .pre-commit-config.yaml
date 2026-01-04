@@ -25,7 +25,7 @@ repos:
     hooks:
       - id: eslint
         name: eslint
-        entry: npx eslint
+        entry: frontend/node_modules/.bin/eslint
         language: node
         files: \.(js|jsx)$
         args: ["--fix"]
