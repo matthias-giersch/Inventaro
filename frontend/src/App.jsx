@@ -7,22 +7,22 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 
 export default function App() {
-	return (
-		<Routes>
-			<Route path="/login" element={<Login />} />
-			<Route path="/register" element={<Register />} />
-			<Route element={<AppLayout />}>
-				<Route path="/dashboard" element={<Dashboard />} />
-				<Route
-					path="/auth/users"
-					element={
-						<AdminRoute>
-							<AdminUsersPage />
-						</AdminRoute>
-					}
-				/>
-			</Route>
-			<Route path="*" element={<Navigate to="/dashboard" />} />
-		</Routes>
-	);
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route element={<AppLayout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/auth/users"
+          element={
+            <AdminRoute>
+              <AdminUsersPage />
+            </AdminRoute>
+          }
+        />
+      </Route>
+      <Route path="*" element={<Navigate to="/dashboard" />} />
+    </Routes>
+  );
 }
