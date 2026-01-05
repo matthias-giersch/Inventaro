@@ -1,119 +1,118 @@
-import { useEffect, useState } from "react";
 import {
-  Box,
-  List,
-  ListItemButton,
-  ListItemText,
-  Typography,
-  Divider,
-  CircularProgress,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
+	Box,
+	Button,
+	CircularProgress,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Divider,
+	List,
+	ListItemButton,
+	ListItemText,
+	TextField,
+	Typography,
 } from "@mui/material";
-
-import { getCategories, createCategory } from "../api/categories";
+import { useCallback, useEffect, useState } from "react";
 import { isAdmin } from "../api/auth";
+import { createCategory, getCategories } from "../api/categories";
 
 export default function CategorySidebar({ onSelect }) {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+	const [categories, setCategories] = useState([]);
+	const [loading, setLoading] = useState(true);
 
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [saving, setSaving] = useState(false);
+	const [open, setOpen] = useState(false);
+	const [name, setName] = useState("");
+	const [saving, setSaving] = useState(false);
 
-  const loadCategories = async () => {
-    try {
-      const data = await getCategories();
-      setCategories(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+	const loadCategories = useCallback(async () => {
+		try {
+			const data = await getCategories();
+			setCategories(data);
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setLoading(false);
+		}
+	}, []);
 
-  useEffect(() => {
-    loadCategories();
-  }, []);
+	useEffect(() => {
+		loadCategories();
+	}, [loadCategories]);
 
-  const handleCreate = async () => {
-    if (!name.trim()) return;
+	const handleCreate = async () => {
+		if (!name.trim()) return;
 
-    try {
-      setSaving(true);
-      await createCategory(name.trim());
-      setName("");
-      setOpen(false);
-      loadCategories();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSaving(false);
-    }
-  };
+		try {
+			setSaving(true);
+			await createCategory(name.trim());
+			setName("");
+			setOpen(false);
+			loadCategories();
+		} catch (err) {
+			console.error(err);
+		} finally {
+			setSaving(false);
+		}
+	};
 
-  return (
-    <Box
-      sx={{
-        width: 260,
-        borderRight: "1px solid #e0e0e0",
-        height: "calc(100vh - 64px)",
-        p: 2,
-      }}
-    >
-      <Typography variant="h6" gutterBottom>
-        Categories
-      </Typography>
+	return (
+		<Box
+			sx={{
+				width: 260,
+				borderRight: "1px solid #e0e0e0",
+				height: "calc(100vh - 64px)",
+				p: 2,
+			}}
+		>
+			<Typography variant="h6" gutterBottom>
+				Categories
+			</Typography>
 
-      {isAdmin() && (
-        <Button
-          fullWidth
-          variant="contained"
-          size="small"
-          sx={{ mb: 2 }}
-          onClick={() => setOpen(true)}
-        >
-          + Add category
-        </Button>
-      )}
+			{isAdmin() && (
+				<Button
+					fullWidth
+					variant="contained"
+					size="small"
+					sx={{ mb: 2 }}
+					onClick={() => setOpen(true)}
+				>
+					+ Add category
+				</Button>
+			)}
 
-      <Divider sx={{ mb: 1 }} />
+			<Divider sx={{ mb: 1 }} />
 
-      {loading ? (
-        <CircularProgress size={24} />
-      ) : (
-        <List>
-          {categories.map((cat) => (
-            <ListItemButton key={cat.id} onClick={() => onSelect?.(cat)}>
-              <ListItemText primary={cat.name} />
-            </ListItemButton>
-          ))}
-        </List>
-      )}
+			{loading ? (
+				<CircularProgress size={24} />
+			) : (
+				<List>
+					{categories.map((cat) => (
+						<ListItemButton key={cat.id} onClick={() => onSelect?.(cat)}>
+							<ListItemText primary={cat.name} />
+						</ListItemButton>
+					))}
+				</List>
+			)}
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>New category</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            fullWidth
-            label="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)}>cancel</Button>
-          <Button onClick={handleCreate} variant="contained" disabled={saving}>
-            create
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
-  );
+			<Dialog open={open} onClose={() => setOpen(false)}>
+				<DialogTitle>New category</DialogTitle>
+				<DialogContent>
+					<TextField
+						autoFocus
+						fullWidth
+						label="Name"
+						value={name}
+						onChange={(e) => setName(e.target.value)}
+					/>
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={() => setOpen(false)}>cancel</Button>
+					<Button onClick={handleCreate} variant="contained" disabled={saving}>
+						create
+					</Button>
+				</DialogActions>
+			</Dialog>
+		</Box>
+	);
 }
