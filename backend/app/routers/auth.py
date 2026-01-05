@@ -33,7 +33,9 @@ def login(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect credentials"
         )
-    token = auth_lib.create_access_token({"sub": str(user.id), "role": user.role})
+    token = auth_lib.create_access_token(
+        {"sub": str(user.id), "role": user.role, "email": user.email}
+    )
     return TokenResponse(access_token=token, token_type="bearer")
 
 
