@@ -1,9 +1,7 @@
 # mypy: ignore-errors
 from typing import Optional
 
-from sqlalchemy import Column
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 
 class Category(SQLModel, table=True):
@@ -11,6 +9,7 @@ class Category(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     owner_id: int
+    items: list["Item"] = Relationship(back_populates="category")
 
 
 class CategoryField(SQLModel, table=True):
@@ -18,14 +17,15 @@ class CategoryField(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
     type: str = Field(default="category")
-    category_id: int
+    category_id: int = Field(foreign_key="categories.id", nullable=False)
 
 
 class Item(SQLModel, table=True):
-    __tablename__ = "items_fields"
+    __tablename__ = "items"
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
-    quantity: int = 0
+    quantity: int
     location: Optional[str] = None
-    category_id: int
-    extra: dict = Field(sa_column=Column(JSONB), default={})
+    category_id: int = Field(foreign_key="categories.id", nullable=False)
+    category: Optional[Category] = Relationship(back_populates="items")
+    extra: Optional[str] = Field(default="")

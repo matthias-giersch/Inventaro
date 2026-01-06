@@ -31,16 +31,16 @@ def create_item(
     session: Session,
     category_id: int,
     name: str,
-    quantity: int = 0,
+    quantity: int,
     location: str | None = None,
-    extra: dict | None = None,
+    extra: str | None = None,
 ) -> Item:
     item = Item(
         name=name,
         quantity=quantity,
         location=location,
         category_id=category_id,
-        extra=extra or {},
+        extra=extra or "",
     )
     session.add(item)
     session.commit()

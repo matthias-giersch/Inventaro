@@ -73,7 +73,7 @@ export default function CategorySidebar({ onSelect }) {
         <Button
           fullWidth
           variant="contained"
-          size="small"
+          size="medium"
           sx={{ mb: 2 }}
           onClick={() => setOpen(true)}
         >
@@ -95,7 +95,12 @@ export default function CategorySidebar({ onSelect }) {
         </List>
       )}
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>New category</DialogTitle>
         <DialogContent>
           <TextField
