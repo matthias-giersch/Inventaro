@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -24,6 +24,6 @@ class CategoryCreate(BaseModel):
 
 class ItemCreate(BaseModel):
     name: str
-    quantity: int = 0
+    quantity: Optional[int] = None
     location: Optional[str] = None
-    extra: Optional[dict[str, Any]] = {}
+    extra: Optional[str] = ""
