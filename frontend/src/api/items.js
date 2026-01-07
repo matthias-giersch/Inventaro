@@ -14,3 +14,7 @@ export async function updateItem(itemId, data) {
   const response = await api.put(`/items/${itemId}`, data);
   return response.data;
 }
+
+export async function deleteItem(itemId) {
+  return await api.delete(`/items/${itemId}`);
+}

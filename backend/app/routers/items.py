@@ -66,3 +66,12 @@ def update_item(
         "location": item.location,
         "extra": item.extra,
     }
+
+
+@router.delete("/{item_id}", status_code=204)
+def delete_item(
+    item_id: int,
+    session: Session = Depends(get_inventory_session),
+    _: JWTPayload = Depends(require_admin),
+) -> None:
+    crud_inventory.delete_item(session, item_id)

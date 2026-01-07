@@ -1,3 +1,4 @@
+import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Box,
@@ -19,7 +20,7 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { isAdmin } from "../api/auth";
-import { createItem, getItems, updateItem } from "../api/items";
+import { createItem, deleteItem, getItems, updateItem } from "../api/items";
 
 export default function ItemList({ category }) {
   const [items, setItems] = useState([]);
@@ -30,6 +31,7 @@ export default function ItemList({ category }) {
   const [location, setLocation] = useState("");
   const [extra, setExtra] = useState("");
   const [editItem, setEditItem] = useState(null);
+  const [deleteItemState, setDeleteItemState] = useState(null);
 
   const loadItems = useCallback(async () => {
     if (!category) return;
@@ -97,6 +99,18 @@ export default function ItemList({ category }) {
       );
       setEditItem(null);
       resetForm();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteItemState) return;
+
+    try {
+      await deleteItem(deleteItemState.id);
+      setItems((prev) => prev.filter((item) => item.id !== deleteItemState.id));
+      setDeleteItemState(null);
     } catch (err) {
       console.error(err);
     }
@@ -225,19 +239,40 @@ export default function ItemList({ category }) {
                   </TableCell>
                   <TableCell align="center">
                     {isAdmin() && (
-                      <IconButton
-                        size="small"
-                        onClick={() => openEditDialog(item)}
+                      <Box
                         sx={{
-                          backgroundColor: "primary.light",
-                          "&:hover": {
-                            backgroundColor: "primary.main",
-                          },
-                          color: "white",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
                         }}
                       >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => openEditDialog(item)}
+                          sx={{
+                            backgroundColor: "primary.light",
+                            "&:hover": {
+                              backgroundColor: "primary.main",
+                            },
+                            color: "white",
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => setDeleteItemState(item)}
+                          sx={{
+                            backgroundColor: "error.light",
+                            "&:hover": {
+                              backgroundColor: "error.main",
+                            },
+                            color: "white",
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
                     )}
                   </TableCell>
                 </TableRow>
@@ -314,6 +349,25 @@ export default function ItemList({ category }) {
           </Button>
           <Button variant="contained" onClick={handleUpdate}>
             Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(deleteItemState)}
+        onClose={() => setDeleteItemState(null)}
+      >
+        <DialogTitle>Delete item</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Do you want to delete the item{" "}
+            <strong>{deleteItemState?.name}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteItemState(null)}>Cancel</Button>
+          <Button variant="contained" onClick={handleDelete}>
+            Delete
           </Button>
         </DialogActions>
       </Dialog>
