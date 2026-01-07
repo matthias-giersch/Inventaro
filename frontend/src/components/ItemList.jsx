@@ -1,23 +1,23 @@
-import { useCallback, useEffect, useState } from "react";
 import {
   Box,
-  Typography,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Paper,
   Table,
+  TableBody,
+  TableCell,
   TableHead,
   TableRow,
-  TableCell,
-  TableBody,
-  Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
-  CircularProgress,
+  Typography,
 } from "@mui/material";
-import { getItems, createItem } from "../api/items";
+import { useCallback, useEffect, useState } from "react";
 import { isAdmin } from "../api/auth";
+import { createItem, getItems } from "../api/items";
 
 export default function ItemList({ category }) {
   const [items, setItems] = useState([]);
