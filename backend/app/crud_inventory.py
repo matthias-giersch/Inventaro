@@ -52,3 +52,19 @@ def list_items_for_categeory(session: Session, category_id: int) -> list[Item]:
     statement = select(Item).where(Item.category_id == category_id)
     result = session.exec(statement).all()
     return result
+
+
+def update_item(session: Session, item_id: int, item_in) -> Item:
+    item = session.get(Item, item_id)
+    if item_in.name is not None:
+        item.name = item_in.name
+    if item_in.quantity is not None:
+        item.quantity = item_in.quantity
+    if item_in.location is not None:
+        item.location = item_in.location
+    if item_in.extra is not None:
+        item.extra = item_in.extra
+    session.add(item)
+    session.commit()
+    session.refresh(item)
+    return item

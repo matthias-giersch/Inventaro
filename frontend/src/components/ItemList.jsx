@@ -1,3 +1,4 @@
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Box,
   Button,
@@ -6,6 +7,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Paper,
   Table,
   TableBody,
@@ -17,16 +19,17 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { isAdmin } from "../api/auth";
-import { createItem, getItems } from "../api/items";
+import { createItem, getItems, updateItem } from "../api/items";
 
 export default function ItemList({ category }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [openCreate, setOpenCreate] = useState(false);
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [location, setLocation] = useState("");
   const [extra, setExtra] = useState("");
+  const [editItem, setEditItem] = useState(null);
 
   const loadItems = useCallback(async () => {
     if (!category) return;
@@ -45,22 +48,55 @@ export default function ItemList({ category }) {
     loadItems();
   }, [loadItems]);
 
+  const resetForm = () => {
+    setName("");
+    setQuantity("");
+    setLocation("");
+    setExtra("");
+  };
+
   const handleCreate = async () => {
     if (!name.trim()) return;
 
     try {
-      await createItem(category.id, {
-        name,
-        quantity: Number(quantity),
-        location: location || null,
-        extra,
-      });
-      setOpen(false);
-      setName("");
-      setQuantity(0);
-      setLocation("");
-      setExtra("");
-      loadItems();
+      const payload = {
+        name: name.trim(),
+        quantity: quantity === "" ? 0 : Number(quantity),
+        location: location.trim() === "" ? null : location,
+        extra: extra.trim() === "" ? "" : extra,
+      };
+      const newItem = await createItem(category.id, payload);
+      setItems((prev) => [...prev, newItem]);
+      setOpenCreate(false);
+      resetForm();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const openEditDialog = (item) => {
+    setEditItem(item);
+    setName(item.name);
+    setQuantity(String(item.quantity));
+    setLocation(item.location || "");
+    setExtra(item.extra || "");
+  };
+
+  const handleUpdate = async () => {
+    if (!editItem) return;
+    try {
+      const payload = {
+        name: name.trim(),
+        quantity: quantity === "" ? 0 : Number(quantity),
+        location: location.trim() === "" ? null : location,
+        extra: extra.trim() === "" ? "" : extra,
+      };
+      const updated = await updateItem(editItem.id, payload);
+      setItems((prev) =>
+        prev.map((item) => (item.id === editItem.id ? updated : item)),
+      );
+      setEditItem(null);
+      resetForm();
     } catch (err) {
       console.error(err);
     }
@@ -85,7 +121,7 @@ export default function ItemList({ category }) {
           <Button
             variant="contained"
             size="medium"
-            onClick={() => setOpen(true)}
+            onClick={() => setOpenCreate(true)}
           >
             + Add item
           </Button>
@@ -95,8 +131,9 @@ export default function ItemList({ category }) {
       {loading ? (
         <CircularProgress />
       ) : (
-        <Paper>
+        <Paper sx={{ width: "95%", tableLayout: "fixed" }}>
           <Table
+            size="small"
             sx={{
               tableLayout: "fixed",
               "& th, & td": {
@@ -186,6 +223,23 @@ export default function ItemList({ category }) {
                   >
                     {item.extra || "-"}
                   </TableCell>
+                  <TableCell align="center">
+                    {isAdmin() && (
+                      <IconButton
+                        size="small"
+                        onClick={() => openEditDialog(item)}
+                        sx={{
+                          backgroundColor: "primary.light",
+                          "&:hover": {
+                            backgroundColor: "primary.main",
+                          },
+                          color: "white",
+                        }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -193,45 +247,118 @@ export default function ItemList({ category }) {
         </Paper>
       )}
 
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog
+        open={openCreate}
+        onClose={() => {
+          setOpenCreate(false);
+          resetForm();
+        }}
+      >
         <DialogTitle>New item</DialogTitle>
         <DialogContent>
-          <TextField
-            label="Name"
-            fullWidth
-            margin="dense"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <TextField
-            label="Quantity"
-            fullWidth
-            margin="dense"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-          />
-          <TextField
-            label="Location"
-            fullWidth
-            margin="dense"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-          <TextField
-            label="Extra"
-            fullWidth
-            margin="dense"
-            value={extra}
-            onChange={(e) => setExtra(e.target.value)}
+          <FormField
+            name={name}
+            quantity={quantity}
+            location={location}
+            extra={extra}
+            setName={setName}
+            setQuantity={setQuantity}
+            setLocation={setLocation}
+            setExtra={setExtra}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button
+            onClick={() => {
+              setOpenCreate(false);
+              resetForm();
+            }}
+          >
+            Cancel
+          </Button>
           <Button variant="contained" onClick={handleCreate}>
             Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(editItem)}
+        onClose={() => {
+          setEditItem(null);
+          resetForm();
+        }}
+        fullWidth
+      >
+        <DialogTitle>Edit item</DialogTitle>
+        <DialogContent>
+          <FormField
+            name={name}
+            quantity={quantity}
+            location={location}
+            extra={extra}
+            setName={setName}
+            setQuantity={setQuantity}
+            setLocation={setLocation}
+            setExtra={setExtra}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setEditItem(null);
+              resetForm();
+            }}
+          >
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={handleUpdate}>
+            Save
           </Button>
         </DialogActions>
       </Dialog>
     </Box>
   );
 }
+
+const FormField = ({
+  name,
+  quantity,
+  location,
+  extra,
+  setName,
+  setQuantity,
+  setLocation,
+  setExtra,
+}) => (
+  <>
+    <TextField
+      label="Name"
+      fullWidth
+      margin="dense"
+      value={name}
+      onChange={(e) => setName(e.target.value)}
+    />
+    <TextField
+      label="Quantity"
+      fullWidth
+      margin="dense"
+      value={quantity}
+      onChange={(e) => setQuantity(e.target.value)}
+    />
+    <TextField
+      label="Location"
+      fullWidth
+      margin="dense"
+      value={location}
+      onChange={(e) => setLocation(e.target.value)}
+    />
+    <TextField
+      label="Extra"
+      fullWidth
+      margin="dense"
+      value={extra}
+      onChange={(e) => setExtra(e.target.value)}
+    />
+  </>
+);
