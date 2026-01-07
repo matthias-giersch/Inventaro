@@ -24,6 +24,13 @@ class CategoryCreate(BaseModel):
 
 class ItemCreate(BaseModel):
     name: str
-    quantity: Optional[int] = None
+    quantity: int = 0
+    location: Optional[str] = None
+    extra: Optional[str] = ""
+
+
+class ItemUpdate(BaseModel):
+    name: str
+    quantity: int
     location: Optional[str] = None
     extra: Optional[str] = ""

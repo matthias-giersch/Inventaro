@@ -3,7 +3,7 @@ from sqlmodel import Session
 
 from .. import crud_inventory
 from ..database_inv import get_inventory_session
-from ..schemas import ItemCreate
+from ..schemas import ItemCreate, ItemUpdate
 from ..utils import JWTPayload, require_admin
 
 router = APIRouter(prefix="/items", tags=["items"])
@@ -24,7 +24,13 @@ def create_item(
         item_in.location,
         item_in.extra,
     )
-    return {"id": it.id, "name": it.name}
+    return {
+        "id": it.id,
+        "name": it.name,
+        "quantity": it.quantity,
+        "location": it.location,
+        "extra": it.extra,
+    }
 
 
 @router.get("/{category_id}", response_model=list[dict])
@@ -43,3 +49,20 @@ def list_items(
         }
         for item in items
     ]
+
+
+@router.put("/{item_id}", status_code=200)
+def update_item(
+    item_id: int,
+    item_in: ItemUpdate,
+    session: Session = Depends(get_inventory_session),
+    _: JWTPayload = Depends(require_admin),
+) -> dict:
+    item = crud_inventory.update_item(session, item_id, item_in)
+    return {
+        "id": item.id,
+        "name": item.name,
+        "quantity": item.quantity,
+        "location": item.location,
+        "extra": item.extra,
+    }
