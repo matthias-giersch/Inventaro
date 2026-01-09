@@ -16,5 +16,6 @@ export async function promoteAdminToUser(userId) {
 }
 
 export async function deleteUser(userId) {
-  return await api.delete(`/auth/users/${userId}/delete-user`);
+  const res = await api.delete(`/auth/users/${userId}/delete-user`);
+  return res.data;
 }

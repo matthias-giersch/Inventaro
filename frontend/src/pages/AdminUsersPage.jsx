@@ -20,7 +20,8 @@ import {
   Typography,
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import { isAdmin } from "../api/auth";
+import { useNavigate } from "react-router-dom";
+import { isAdmin, logout } from "../api/auth";
 import {
   deleteUser,
   getUsers,
@@ -34,6 +35,7 @@ export default function AdminUsersPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [deleteUserState, setDeleteUserState] = useState(null);
+  const navigate = useNavigate();
 
   const loadUsers = useCallback(async () => {
     try {
@@ -81,9 +83,13 @@ export default function AdminUsersPage() {
   const handleDeleteUser = async () => {
     if (!deleteUserState) return;
     try {
-      await deleteUser(deleteUserState.id);
+      const res = await deleteUser(deleteUserState.id);
       setUsers((prev) => prev.filter((u) => u.id !== deleteUserState.id));
       setSuccess(`User ${deleteUserState.email} deleted`);
+      if (res.self_deleted) {
+        logout();
+        navigate("/login");
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -216,7 +222,7 @@ export default function AdminUsersPage() {
                           checked={user.role === "admin"}
                           onChange={() => handleToggleAdmin(user)}
                           color="primary"
-                          disabled={user.email === "admin@example.com"}
+                          disabled={user.is_initial_admin}
                         />
                         <Typography variant="body2">Admin</Typography>
                       </Box>
@@ -229,7 +235,7 @@ export default function AdminUsersPage() {
                       >
                         <IconButton
                           size="small"
-                          disabled={user.email === "admin@example.com"}
+                          disabled={user.is_initial_admin}
                           onClick={() => setDeleteUserState(user)}
                           sx={{
                             backgroundColor: "error.light",

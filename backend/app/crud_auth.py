@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import Final, Optional
 
-from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
 from .models_auth import User
@@ -51,14 +50,11 @@ def list_users(session: Session) -> list[User]:
     return session.exec(statement).all()
 
 
-def delete_user(session: Session, user_id: int) -> None:
+def delete_user(session: Session, user_id: int, current_user_id: int) -> bool:
     user = session.get(User, user_id)
-    if user.email == ADMIN_EMAIL:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="The initial admin can't be deleted",
-        )
     if not user:
         raise ValueError("User not found")
+    self_deleted = user.id == current_user_id
     session.delete(user)
     session.commit()
+    return self_deleted

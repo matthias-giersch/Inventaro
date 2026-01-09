@@ -1,3 +1,6 @@
+from pathlib import Path
+from typing import Final
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
@@ -5,7 +8,10 @@ from .. import auth as auth_lib
 from .. import crud_auth
 from ..database_auth import get_auth_session
 from ..schemas import TokenResponse, UserCreate, UserLogin
+from ..secrets import read_secret
 from ..utils import JWTPayload, require_admin
+
+ADMIN_EMAIL: Final = read_secret(Path("/run/secrets/admin_email"))
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -50,6 +56,7 @@ def list_users(
             "id": user.id,
             "email": user.email,
             "role": user.role,
+            "is_initial_admin": user.email == ADMIN_EMAIL,
         }
         for user in users
     ]
@@ -99,11 +106,16 @@ def make_admin_user(
 def delete_user(
     user_id: int,
     session: Session = Depends(get_auth_session),
-    _: JWTPayload = Depends(require_admin),
+    payload: JWTPayload = Depends(require_admin),
 ):
     try:
-        crud_auth.delete_user(session, user_id)
+        current_user_id = int(payload["sub"])
+        self_deleted = crud_auth.delete_user(session, user_id, current_user_id)
     except ValueError as err:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         ) from err
+    return {
+        "deleted_user_id": user_id,
+        "self_deleted": self_deleted,
+    }
