@@ -1,9 +1,13 @@
-from typing import Optional
+from pathlib import Path
+from typing import Final, Optional
 
 from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
 from .models_auth import User
+from .secrets import read_secret
+
+ADMIN_EMAIL: Final = read_secret(Path("/run/secrets/admin_email"))
 
 
 def get_user_by_email(session: Session, email: str) -> Optional[User]:
@@ -49,7 +53,7 @@ def list_users(session: Session) -> list[User]:
 
 def delete_user(session: Session, user_id: int) -> None:
     user = session.get(User, user_id)
-    if user.email == "admin@example.com":
+    if user.email == ADMIN_EMAIL:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="The initial admin can't be deleted",
