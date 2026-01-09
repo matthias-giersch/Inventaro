@@ -1,8 +1,12 @@
-from typing import Optional
+from pathlib import Path
+from typing import Final, Optional
 
 from sqlmodel import Session, select
 
 from .models_auth import User
+from .secrets import read_secret
+
+ADMIN_EMAIL: Final = read_secret(Path("/run/secrets/admin_email"))
 
 
 def get_user_by_email(session: Session, email: str) -> Optional[User]:
@@ -44,3 +48,13 @@ def promote_admin_to_user(session: Session, user_id: int) -> User:
 def list_users(session: Session) -> list[User]:
     statement = select(User)
     return session.exec(statement).all()
+
+
+def delete_user(session: Session, user_id: int, current_user_id: int) -> bool:
+    user = session.get(User, user_id)
+    if not user:
+        raise ValueError("User not found")
+    self_deleted = user.id == current_user_id
+    session.delete(user)
+    session.commit()
+    return self_deleted

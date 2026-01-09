@@ -6,6 +6,16 @@ export async function getUsers() {
 }
 
 export async function promoteUserToAdmin(userId) {
-  const res = await api.post(`/auth/users/${userId}/promote`);
+  const res = await api.post(`/auth/users/${userId}/make-admin`);
+  return res.data;
+}
+
+export async function promoteAdminToUser(userId) {
+  const res = await api.post(`/auth/users/${userId}/make-user`);
+  return res.data;
+}
+
+export async function deleteUser(userId) {
+  const res = await api.delete(`/auth/users/${userId}/delete-user`);
   return res.data;
 }
