@@ -93,3 +93,17 @@ def make_admin_user(
         "email": user.email,
         "role": user.role,
     }
+
+
+@router.delete("/users/{user_id}/delete-user")
+def delete_user(
+    user_id: int,
+    session: Session = Depends(get_auth_session),
+    _: JWTPayload = Depends(require_admin),
+):
+    try:
+        crud_auth.delete_user(session, user_id)
+    except ValueError as err:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        ) from err

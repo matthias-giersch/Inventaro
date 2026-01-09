@@ -1,5 +1,6 @@
 from typing import Optional
 
+from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
 from .models_auth import User
@@ -44,3 +45,16 @@ def promote_admin_to_user(session: Session, user_id: int) -> User:
 def list_users(session: Session) -> list[User]:
     statement = select(User)
     return session.exec(statement).all()
+
+
+def delete_user(session: Session, user_id: int) -> None:
+    user = session.get(User, user_id)
+    if user.email == "admin@example.com":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The initial admin can't be deleted",
+        )
+    if not user:
+        raise ValueError("User not found")
+    session.delete(user)
+    session.commit()
