@@ -86,19 +86,20 @@ def make_user_admin(
 def make_admin_user(
     user_id: int,
     session: Session = Depends(get_auth_session),
-    _: JWTPayload = Depends(require_admin),
+    payload: JWTPayload = Depends(require_admin),
 ):
     try:
         user = crud_auth.promote_admin_to_user(session, user_id)
+        self_demoted = int(payload["sub"]) == user_id
     except ValueError as err:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         ) from err
-
     return {
         "id": user.id,
         "email": user.email,
         "role": user.role,
+        "self_demoted": self_demoted,
     }
 
 
