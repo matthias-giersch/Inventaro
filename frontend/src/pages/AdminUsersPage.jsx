@@ -21,7 +21,7 @@ import {
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { isAdmin, logout } from "../api/auth";
+import { getUserFromToken, isAdmin, logout } from "../api/auth";
 import {
   deleteUser,
   getUsers,
@@ -35,6 +35,8 @@ export default function AdminUsersPage() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [deleteUserState, setDeleteUserState] = useState(null);
+  const [confirmUser, setConfirmUser] = useState(null);
+  const [confirmAction, setConfirmAction] = useState(null);
   const navigate = useNavigate();
 
   const loadUsers = useCallback(async () => {
@@ -68,6 +70,11 @@ export default function AdminUsersPage() {
         ),
       );
       setSuccess(`User "${user.email}" is now ${updatedUser.role}`);
+      if (updatedUser.self_demoted) {
+        logout();
+        navigate("/login");
+        return;
+      }
     } catch (err) {
       console.error(err);
       setError(
@@ -220,7 +227,14 @@ export default function AdminUsersPage() {
                       >
                         <Switch
                           checked={user.role === "admin"}
-                          onChange={() => handleToggleAdmin(user)}
+                          onChange={() => {
+                            setConfirmUser(user);
+                            setConfirmAction(
+                              user.role === "admin"
+                                ? "make-user"
+                                : "make-admin",
+                            );
+                          }}
                           color="primary"
                           disabled={user.is_initial_admin}
                         />
@@ -265,11 +279,70 @@ export default function AdminUsersPage() {
             Do you want to delete the user{" "}
             <strong>{deleteUserState?.email}</strong>?
           </Typography>
+          {deleteUserState?.id === Number(getUserFromToken().id) && (
+            <Typography color="error" mt={2}>
+              You will be logged out immediately
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteUserState(null)}>Cancel</Button>
-          <Button variant="contained" onClick={handleDeleteUser}>
+          <Button
+            onClick={() => setDeleteUserState(null)}
+            variant="contained"
+            color="info"
+          >
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={handleDeleteUser} color="error">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(confirmUser)}
+        onClose={() => {
+          setConfirmUser(null);
+          setConfirmAction(null);
+        }}
+      >
+        <DialogTitle>Confirm role change</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Do you want to to{" "}
+            <strong>
+              {confirmAction === "make-admin" ? "promote" : "demote"}
+            </strong>{" "}
+            user <strong>{confirmUser?.email}</strong>?
+          </Typography>
+          {confirmUser?.id === Number(getUserFromToken().id) &&
+            confirmAction === "make-user" && (
+              <Typography color="error" mt={2}>
+                You will be logged out immediately
+              </Typography>
+            )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setConfirmUser(null);
+              setConfirmAction(null);
+            }}
+            variant="contained"
+            color="info"
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="warning"
+            onClick={async () => {
+              await handleToggleAdmin(confirmUser);
+              setConfirmUser(null);
+              setConfirmAction(null);
+            }}
+          >
+            Confirm
           </Button>
         </DialogActions>
       </Dialog>
