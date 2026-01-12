@@ -22,7 +22,7 @@ export default function AppHeader() {
             cursor: "pointer",
             fontWeight: "bold",
           }}
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/dashboard")}
         >
           Inventaro
         </Typography>
@@ -30,7 +30,7 @@ export default function AppHeader() {
         <Box display="flex" alignItems="center" gap={2} marginLeft="auto">
           {isAdmin() && (
             <Button
-              color="info"
+              color="secondary"
               variant="contained"
               onClick={() => navigate("/auth/users")}
             >
