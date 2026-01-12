@@ -165,7 +165,7 @@ export default function ItemList({ category }) {
                   sx={{
                     fontSize: "1.125rem",
                     fontWeight: "bold",
-                    width: "25%",
+                    width: "20%",
                   }}
                 >
                   Name
@@ -195,10 +195,20 @@ export default function ItemList({ category }) {
                   sx={{
                     fontSize: "1.125rem",
                     fontWeight: "bold",
-                    width: "45%",
+                    width: "40%",
                   }}
                 >
                   Extras
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{
+                    fontSize: "1.125rem",
+                    fontWeight: "bold",
+                    width: "10%",
+                  }}
+                >
+                  Actions
                 </TableCell>
               </TableRow>
             </TableHead>
@@ -237,41 +247,58 @@ export default function ItemList({ category }) {
                   >
                     {item.extra || "-"}
                   </TableCell>
-                  <TableCell align="center">
+                  <TableCell>
                     {isAdmin() && (
                       <Box
                         sx={{
                           display: "flex",
                           alignItems: "center",
+                          justifyContent: "center",
                           gap: 1,
                         }}
                       >
-                        <IconButton
-                          size="small"
-                          onClick={() => openEditDialog(item)}
+                        <Box
                           sx={{
-                            backgroundColor: "primary.light",
-                            "&:hover": {
-                              backgroundColor: "primary.main",
-                            },
-                            color: "white",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
                           }}
                         >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => setDeleteItemState(item)}
+                          <IconButton
+                            size="small"
+                            onClick={() => openEditDialog(item)}
+                            sx={{
+                              backgroundColor: "primary.light",
+                              "&:hover": {
+                                backgroundColor: "primary.main",
+                              },
+                              color: "white",
+                            }}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                        <Box
                           sx={{
-                            backgroundColor: "error.light",
-                            "&:hover": {
-                              backgroundColor: "error.main",
-                            },
-                            color: "white",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
                           }}
                         >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={() => setDeleteItemState(item)}
+                            sx={{
+                              backgroundColor: "error.light",
+                              "&:hover": {
+                                backgroundColor: "error.main",
+                              },
+                              color: "white",
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
                       </Box>
                     )}
                   </TableCell>
