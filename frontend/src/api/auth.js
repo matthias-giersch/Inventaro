@@ -10,7 +10,7 @@ export function saveToken(accessToken, refreshToken, refreshExpiresAt) {
   localStorage.setItem("refresh_token", refreshToken);
   localStorage.setItem(
     "refresh_expires_at",
-    newDate(refreshExpiresAt).toISOString(),
+    new Date(refreshExpiresAt).toISOString(),
   );
 }
 
