@@ -1,9 +1,11 @@
 from pathlib import Path
 from typing import Final, Optional
 
+from fastapi import HTTPException, status
+from sqlalchemy import delete
 from sqlmodel import Session, select
 
-from .models_auth import User
+from .models_auth import RefreshToken, User
 from .secrets import read_secret
 
 ADMIN_EMAIL: Final = read_secret(Path("/run/secrets/admin_email"))
@@ -54,6 +56,12 @@ def delete_user(session: Session, user_id: int, current_user_id: int) -> bool:
     user = session.get(User, user_id)
     if not user:
         raise ValueError("User not found")
+    if user.email == ADMIN_EMAIL:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The initial admin can't be deleted",
+        )
+    session.exec(delete(RefreshToken).where(RefreshToken.user_id == user.id))
     self_deleted = user.id == current_user_id
     session.delete(user)
     session.commit()
