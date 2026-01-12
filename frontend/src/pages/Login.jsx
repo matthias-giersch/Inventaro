@@ -9,8 +9,8 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
-import { saveToken } from "../auth";
+import api from "../api/api";
+import { initAuth, saveToken } from "../api/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -24,7 +24,12 @@ export default function Login() {
         email: email,
         password: password,
       });
-      saveToken(res.data.access_token);
+      saveToken(
+        res.data.access_token,
+        res.data.refresh_token,
+        res.data.refresh_expires_at,
+      );
+      initAuth();
       nav("/dashboard");
     } catch (err) {
       console.error("Login failed", err);
