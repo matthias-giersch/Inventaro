@@ -44,6 +44,12 @@ services:
       - ./secrets/auth_postgres_user:/run/secrets/auth_postgres_user:ro
       - ./secrets/auth_postgres_password:/run/secrets/auth_postgres_password:ro
       - ./secrets/auth_postgres_db:/run/secrets/auth_postgres_db:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$(cat /run/secrets/auth_postgres_user)\" -d \"$(cat /run/secrets/auth_postgres_db)\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
     networks:
       - backend_net
 
@@ -65,6 +71,12 @@ services:
       - ./secrets/inv_postgres_user:/run/secrets/inv_postgres_user:ro
       - ./secrets/inv_postgres_password:/run/secrets/inv_postgres_password:ro
       - ./secrets/inv_postgres_db:/run/secrets/inv_postgres_db:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$(cat /run/secrets/inv_postgres_user)\" -d \"$(cat /run/secrets/inv_postgres_db)\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
     networks:
       - backend_net
 
