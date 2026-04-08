@@ -30,6 +30,7 @@ import {
 } from "../api/users";
 
 export default function AdminUsersPage() {
+  const currentUser = getUserFromToken();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -279,7 +280,7 @@ export default function AdminUsersPage() {
             Do you want to delete the user{" "}
             <strong>{deleteUserState?.email}</strong>?
           </Typography>
-          {deleteUserState?.id === Number(getUserFromToken().id) && (
+          {deleteUserState?.id === Number(currentUser?.id) && (
             <Typography color="error" mt={2}>
               You will be logged out immediately
             </Typography>
@@ -315,7 +316,7 @@ export default function AdminUsersPage() {
             </strong>{" "}
             user <strong>{confirmUser?.email}</strong>?
           </Typography>
-          {confirmUser?.id === Number(getUserFromToken().id) &&
+          {confirmUser?.id === Number(currentUser?.id) &&
             confirmAction === "make-user" && (
               <Typography color="error" mt={2}>
                 You will be logged out immediately

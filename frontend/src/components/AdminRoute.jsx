@@ -8,11 +8,11 @@ export default function AdminRoute({ children }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("access_token");
 
     let timeout;
     try {
-      if (!token) throw new Error("No token");
+      if (!token) throw new Error("No access_token");
 
       const payload = JSON.parse(atob(token.split(".")[1]));
 
@@ -38,7 +38,7 @@ export default function AdminRoute({ children }) {
     return () => clearTimeout(timeout);
   }, [navigate]);
 
-  if (!isAdmin) {
+  if (isAdmin === false) {
     return (
       <Snackbar
         open={showAlert}
