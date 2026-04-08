@@ -16,9 +16,11 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   const token = getAccessToken();
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
@@ -45,7 +47,7 @@ api.interceptors.response.use(
 
       saveToken(
         res.data.access_token,
-        refreshToken,
+        res.data.refresh_token,
         res.data.refresh_expires_at,
       );
       initAuth();

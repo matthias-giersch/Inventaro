@@ -4,10 +4,10 @@ import CategorySidebar from "../components/CategorySidebar";
 import ItemList from "../components/ItemList";
 
 export default function Dashboard() {
-  const [selectedCategory, setSelectedCatgory] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   return (
     <Box display="flex">
-      <CategorySidebar onSelect={setSelectedCatgory} />
+      <CategorySidebar onSelect={setSelectedCategory} />
       <ItemList category={selectedCategory} />
     </Box>
   );

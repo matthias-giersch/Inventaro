@@ -9,8 +9,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api/api";
-import { initAuth, saveToken } from "../api/auth";
+import { initAuth, login, saveToken } from "../api/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -19,21 +18,21 @@ export default function Login() {
 
   async function submit(e) {
     e.preventDefault();
+
     try {
-      const res = await api.post("/auth/login", {
-        email: email,
-        password: password,
-      });
-      saveToken(
-        res.data.access_token,
-        res.data.refresh_token,
-        res.data.refresh_expires_at,
-      );
+      const data = await login(email, password);
+
+      saveToken(data.access_token, data.refresh_token, data.refresh_expires_at);
+
       initAuth();
       nav("/dashboard");
     } catch (err) {
-      console.error("Login failed", err);
-      alert(`Login failed: ${err.response?.data?.detail || err.message}`);
+      console.error("LOGIN ERROR:", err);
+
+      if (err.response) {
+        console.error("STATUS:", err.response.status);
+        console.error("DATA:", JSON.stringify(err.response.data, null, 2));
+      }
     }
   }
 

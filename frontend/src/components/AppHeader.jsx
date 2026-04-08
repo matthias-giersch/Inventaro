@@ -32,7 +32,7 @@ export default function AppHeader() {
             <Button
               color="secondary"
               variant="contained"
-              onClick={() => navigate("/auth/users")}
+              onClick={() => navigate("/admin/users")}
             >
               Users
             </Button>

@@ -1,17 +1,25 @@
-import api from "./api";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
 const REFRESH_EXPIRES_AT_KEY = "refresh_expires_at";
 
 export function saveToken(accessToken, refreshToken, refreshExpiresAt) {
-  if (!refreshExpiresAt) return;
-  localStorage.setItem("access_token", accessToken);
-  localStorage.setItem("refresh_token", refreshToken);
-  localStorage.setItem(
-    "refresh_expires_at",
-    new Date(refreshExpiresAt).toISOString(),
-  );
+  if (accessToken) {
+    localStorage.setItem("access_token", accessToken);
+  }
+  if (refreshToken) {
+    localStorage.setItem("refresh_token", refreshToken);
+  }
+
+  if (refreshExpiresAt) {
+    localStorage.setItem(
+      REFRESH_EXPIRES_AT_KEY,
+      new Date(refreshExpiresAt).toISOString(),
+    );
+  }
 }
 
 let logoutTimeout = null;
@@ -38,7 +46,7 @@ export function initAuth() {
 }
 
 export function getAccessToken() {
-  return localStorage.getItem(ACCESS_TOKEN_KEY);
+  return localStorage.getItem("access_token");
 }
 
 export function getRefreshToken() {
@@ -60,7 +68,7 @@ export function clearTokens() {
 }
 
 export async function login(email, password) {
-  const res = await api.post("/auth/login", {
+  const res = await axios.post(`${API_URL}/auth/login`, {
     email,
     password,
   });

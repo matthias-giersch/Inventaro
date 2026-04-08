@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Router, Routes, useNavigate } from "react-router-dom";
 import { initAuth } from "./api/auth";
 import AdminRoute from "./components/AdminRoute";
 import AppLayout from "./components/AppLayout";
@@ -16,6 +16,7 @@ export default function App() {
 
   return (
     <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
@@ -36,8 +37,10 @@ export default function App() {
           </AdminRoute>
         }
       >
-        <Route path="/auth/users" element={<AdminUsersPage />} />
+        <Route path="/admin/users" element={<AdminUsersPage />} />
       </Route>
+
+      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
 }
