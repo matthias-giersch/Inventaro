@@ -5,7 +5,7 @@ WORKDIR /app
 COPY requirements.txt ./
 
 RUN apt-get update && \
-    apt-get install -y netcat-openbsd && \
+    apt-get install -y postgresql-client && \
     pip install --no-cache-dir -r requirements.txt && \
     rm -rf /var/lib/apt/lists/*
 
@@ -14,7 +14,7 @@ COPY wait_for_db.sh ./wait_for_db.sh
 
 RUN chmod +x ./wait_for_db.sh
 
-ENV PYTHONUBUFFERED=1
+ENV PYTHONUNBUFFERED=1
 
 EXPOSE 8000
 

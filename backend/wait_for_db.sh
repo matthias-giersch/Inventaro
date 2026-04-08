@@ -24,7 +24,7 @@ for db in "${db_hosts[@]}"; do
 
     echo "Waiting for $host:$port ..."
 
-    until nc -z "$host" "$port"; do
+    until pg_isready -h "$host" -p "$port"; do
         sleep 2
     done
 
