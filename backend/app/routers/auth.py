@@ -90,7 +90,7 @@ def refresh_access_token(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
         )
 
-    if token_entry.expires_at < datetime.now(datetime.timezone.utc):
+    if token_entry.expires_at < datetime.now(timezone.utc):
         session.delete(token_entry)
         session.commit()
         raise HTTPException(
