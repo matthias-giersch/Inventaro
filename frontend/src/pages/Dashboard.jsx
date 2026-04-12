@@ -7,7 +7,10 @@ export default function Dashboard() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   return (
     <Box display="flex">
-      <CategorySidebar onSelect={setSelectedCategory} />
+      <CategorySidebar
+        onSelect={setSelectedCategory}
+        selectedCategory={selectedCategory}
+      />
       <ItemList category={selectedCategory} />
     </Box>
   );

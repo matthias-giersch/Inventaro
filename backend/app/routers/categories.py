@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
 from .. import crud_inventory
@@ -26,3 +26,23 @@ def list_categories(
 ) -> list[dict]:
     cats = crud_inventory.list_categories_for_user(session)
     return [{"id": c.id, "name": c.name} for c in cats]
+
+
+@router.delete("/{category_id}")
+def delete_category(
+    category_id: int,
+    session: Session = Depends(get_inventory_session),
+    _: JWTPayload = Depends(require_admin),
+) -> dict:
+    category = crud_inventory.get_category_by_id(session, category_id)
+    if category is None:
+        raise HTTPException(status_code=404, detail="Category not found")
+
+    items = crud_inventory.list_items_for_categeory(session, category_id)
+    if items:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Category can't be deleted because it still contains items.",
+        )
+    crud_inventory.delete_category(session, category_id)
+    return {"message": "Category deleted"}

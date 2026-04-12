@@ -34,7 +34,11 @@ export default function ItemList({ category }) {
   const [deleteItemState, setDeleteItemState] = useState(null);
 
   const loadItems = useCallback(async () => {
-    if (!category) return;
+    if (!category) {
+      setItems([]);
+      return;
+    }
+
     try {
       setLoading(true);
       const data = await getItems(category.id);
