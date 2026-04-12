@@ -1,4 +1,6 @@
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
+  Alert,
   Box,
   Button,
   CircularProgress,
@@ -7,23 +9,37 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  IconButton,
   List,
   ListItemButton,
   ListItemText,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { isAdmin } from "../api/auth";
-import { createCategory, getCategories } from "../api/categories";
+import {
+  createCategory,
+  deleteCategory,
+  getCategories,
+} from "../api/categories";
 
-export default function CategorySidebar({ onSelect }) {
+export default function CategorySidebar({ onSelect, selectedCategory }) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const [deleteCategoryState, setDeleteCategoryState] = useState(null);
+
+  const [deleteBlockedMessage, setDeleteBlockedMessage] = useState("");
+  const [openDeleteBlockedDialog, setOpenDeleteBlockedDialog] = useState(false);
+
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const loadCategories = useCallback(async () => {
     try {
@@ -53,6 +69,37 @@ export default function CategorySidebar({ onSelect }) {
       console.error(err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!deleteCategoryState) return;
+
+    try {
+      await deleteCategory(deleteCategoryState.id);
+
+      setCategories((prev) =>
+        prev.filter((cat) => cat.id !== deleteCategoryState.id),
+      );
+      if (selectedCategory?.id === deleteCategoryState.id) {
+        onSelect?.(null);
+      }
+
+      setSuccess(`Category "${deleteCategoryState.name}" deleted.`);
+    } catch (err) {
+      console.error(err);
+      const detail = err.response?.data?.detail;
+      if (err.response?.status === 409) {
+        setDeleteBlockedMessage(
+          detail ||
+            "This category can't be deleted because it still contains items.",
+        );
+        setOpenDeleteBlockedDialog(true);
+      } else {
+        setError(detail || "Category could not be deleted.");
+      }
+    } finally {
+      setDeleteCategoryState(null);
     }
   };
 
@@ -87,11 +134,37 @@ export default function CategorySidebar({ onSelect }) {
         <CircularProgress size={24} />
       ) : (
         <List>
-          {categories.map((cat) => (
-            <ListItemButton key={cat.id} onClick={() => onSelect?.(cat)}>
-              <ListItemText primary={cat.name} />
-            </ListItemButton>
-          ))}
+          {categories.map((cat) => {
+            const isSelected = selectedCategory?.id === cat.id;
+
+            return (
+              <Box
+                key={cat.id}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <ListItemButton
+                  selected={isSelected}
+                  onClick={() => onSelect?.(cat)}
+                  sx={{ borderRadius: 1 }}
+                >
+                  <ListItemText primary={cat.name} />
+                </ListItemButton>
+
+                {isAdmin() && (
+                  <IconButton
+                    size="small"
+                    onClick={() => setDeleteCategoryState(cat)}
+                    sx={{ ml: 1 }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </Box>
+            );
+          })}
         </List>
       )}
 
@@ -115,6 +188,53 @@ export default function CategorySidebar({ onSelect }) {
           <Button onClick={() => setOpen(false)}>cancel</Button>
           <Button onClick={handleCreate} variant="contained" disabled={saving}>
             create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={Boolean(deleteCategoryState)}
+        onClose={() => setDeleteCategoryState(null)}
+      >
+        <DialogTitle>Delete category</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Do you want to delete the category{" "}
+            <strong>{deleteCategoryState?.name}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteCategoryState(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDeleteCategory}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={Boolean(success)}
+        autoHideDuration={4000}
+        onClose={() => setSuccess(null)}
+      >
+        <Alert severity="success">{success}</Alert>
+      </Snackbar>
+      <Dialog
+        open={openDeleteBlockedDialog}
+        onClose={() => setOpenDeleteBlockedDialog(false)}
+      >
+        <DialogTitle>Category can't be deleted</DialogTitle>
+        <DialogContent>
+          <Typography>{deleteBlockedMessage}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            onClick={() => setOpenDeleteBlockedDialog(false)}
+          >
+            OK
           </Button>
         </DialogActions>
       </Dialog>
