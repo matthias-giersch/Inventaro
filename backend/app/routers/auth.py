@@ -39,7 +39,8 @@ def login(
     user = crud_auth.get_user_by_email(session, user_in.email)
     if not user or not auth_lib.verify_password(user_in.password, user.hashed_password):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect credentials"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect credentials.",
         )
 
     access_token = auth_lib.create_access_token(
@@ -72,6 +73,7 @@ def logout(
     ).first()
 
     if token_entry:
+        token_entry.revoked = False
         session.delete(token_entry)
         session.commit()
 
@@ -87,23 +89,72 @@ def refresh_access_token(
 
     if not token_entry:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token.",
+        )
+
+    if token_entry.revoked:
+        user_tokens = session.exec(
+            select(RefreshToken).where(RefreshToken.user_id == token_entry.user_id)
+        ).all()
+
+        for token in user_tokens:
+            token.revoked = True
+
+        session.add_all(user_tokens)
+        session.commit()
+
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token reuse detected. Please log in again.",
         )
 
     if token_entry.expires_at < datetime.now(timezone.utc):
-        session.delete(token_entry)
+        token_entry.revoked = True
+        session.add(token_entry)
         session.commit()
+
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token expired"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token expired.",
         )
 
     user = session.get(User, token_entry.user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found.",
+        )
+
+    token_entry.revoked = True
+
+    new_refresh_token = auth_lib.create_refresh_token()
+    new_expires_at = datetime.now(timezone.utc) + timedelta(
+        days=auth_lib.REFRESH_TOKEN_EXPIRE_DAYS
+    )
+
+    token_entry.replaced_by_token = new_refresh_token
+    session.add(token_entry)
+
+    session.add(
+        RefreshToken(
+            token=new_refresh_token,
+            user_id=user.id,
+            expires_at=new_expires_at,
+            revoked=False,
+            replaced_by_token=None,
+        )
+    )
+
     access_token = auth_lib.create_access_token(
         {
             "sub": str(user.id),
             "role": user.role,
+            "email": user.email,
         }
     )
+
+    session.commit()
 
     return TokenResponse(
         access_token=access_token,
@@ -139,7 +190,8 @@ def make_user_admin(
         user = crud_auth.promote_user_to_admin(session, user_id)
     except ValueError as err:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
         ) from err
 
     return {
@@ -160,7 +212,8 @@ def make_admin_user(
         self_demoted = int(payload["sub"]) == user_id
     except ValueError as err:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
         ) from err
     return {
         "id": user.id,
@@ -181,7 +234,8 @@ def delete_user(
         self_deleted = crud_auth.delete_user(session, user_id, current_user_id)
     except ValueError as err:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
         ) from err
     return {
         "deleted_user_id": user_id,
